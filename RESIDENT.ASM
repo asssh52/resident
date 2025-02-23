@@ -26,7 +26,7 @@ TTL_REGS  equ 8d
         mov ax, es:[bx+2]
         mov OldHdlrSeg, ax
 
-        mov es:[bx], offset Handler
+        mov es:[bx], offset Handler ; load handler addr
         push cs
         pop ax
         mov es:[bx+2], ax
@@ -127,7 +127,7 @@ PrintValue proc
     mov bx, sp              ; bx = stack_ptr
     add bx, TTL_REGS * 2    ; bx = stack_ptr + 8 * 2 (ss:[bx] == x[0])
     sub bx, NUM_REGS * 2    ; bx -= num_regs_to_show (ss:[bx] == x[num_reg])
-    add cx, 2d
+    add cx, 2d              ; stack depth was 3
     shl cx, 1d
     add bx, cx              ; bx += counter * 2      (ss:[bx] == x[i])
     shr cx, 1d
