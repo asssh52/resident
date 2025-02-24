@@ -6,11 +6,11 @@ org 100h
 VIDEOSEG  equ 0b800h
 Y_POS     equ 1d
 X_POS     equ 72d
-TBL_HGHT  equ 8d
+TBL_HGHT  equ 13d
 TBL_WDTH  equ 7d
 CLR_PRMS  equ 00101110b
-NUM_REGS  equ 4d
-TTL_REGS  equ 8d
+NUM_REGS  equ 13d
+TTL_REGS  equ 13d
 ;-=-=-=-==--=-=-=-=-=-=-=-==-=
 
 ;------------------------------------------------------------------------------------------------------
@@ -18,7 +18,7 @@ TTL_REGS  equ 8d
     Start:
         xor ax, ax
         mov es, ax              ; es = 0
-        mov bx, 08h * 4         ; bx = 9 * 4, each int handler addr is made of 4 bytes
+        mov bx, 09h * 4         ; bx = 9 * 4, each int handler addr is made of 4 bytes
 
         cli                     ; do not allow to interrupt during these lines
         mov ax, es:[bx]         ; save old handler addr
@@ -26,11 +26,12 @@ TTL_REGS  equ 8d
         mov ax, es:[bx+2]
         mov OldHdlrSeg, ax
 
-        mov es:[bx], offset Handler ; load handler addr
+        mov es:[bx], offset Handler
         push cs
         pop ax
         mov es:[bx+2], ax
         sti
+        int 09h
 
         mov al, 20h
         out 20h, al
@@ -56,7 +57,7 @@ TTL_REGS  equ 8d
 ;======================================================================================================
 Handler proc
 
-    push ax bx cx dx si di ds es                ; save condition of registers
+    push ax bx cx dx si di bp sp ds es ss cs    ; save condition of registers
 
     push cs
     pop ds                                      ; ds in command segment
@@ -76,9 +77,7 @@ Handler proc
 
     call PrintRegs
 
-
-
-    pop es ds di si dx cx bx ax                 ; load condition of registers
+    pop ax ss es ds sp bp di si dx cx bx ax     ; load condition of registers
 
                  db 0eah                        ; jmp to next handler
     OldHdlrAddr  dw 0h                          ; space for addr to next handler
@@ -127,7 +126,7 @@ PrintValue proc
     mov bx, sp              ; bx = stack_ptr
     add bx, TTL_REGS * 2    ; bx = stack_ptr + 8 * 2 (ss:[bx] == x[0])
     sub bx, NUM_REGS * 2    ; bx -= num_regs_to_show (ss:[bx] == x[num_reg])
-    add cx, 2d              ; stack depth was 3
+    add cx, 2d              ; stack depth is 3
     shl cx, 1d
     add bx, cx              ; bx += counter * 2      (ss:[bx] == x[i])
     shr cx, 1d
@@ -135,6 +134,13 @@ PrintValue proc
 
     mov word ptr dx, ss:[bx]
     mov bx, dx
+
+    cmp cx, 8d              ; is printing sp?
+    jne EndPrValue
+
+    add bx, 16d              ; then move further
+
+    EndPrValue:
 
     mov si, offset Numbers
     push si
@@ -297,7 +303,7 @@ DrawLine proc
     endp
 ;================================================================
 Style:      db 201, 205, 187, 186, 0, 186, 200, 205, 188
-Registers:  db "ax:bx:cx:dx:si:di:ds:es:"
+Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
 Numbers:    db "0123456789ABCDEF"
 
 FileEnd:
