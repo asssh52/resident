@@ -6,11 +6,11 @@ org 100h
 VIDEOSEG  equ 0b800h
 Y_POS     equ 1d
 X_POS     equ 72d
-TBL_HGHT  equ 13d
+TBL_HGHT  equ 12d
 TBL_WDTH  equ 7d
 CLR_PRMS  equ 00101110b
-NUM_REGS  equ 13d
-TTL_REGS  equ 13d
+NUM_REGS  equ 12d
+TTL_REGS  equ 12d
 ;-=-=-=-==--=-=-=-=-=-=-=-==-=
 
 ;------------------------------------------------------------------------------------------------------
@@ -135,7 +135,7 @@ PrintValue proc
     mov word ptr dx, ss:[bx]
     mov bx, dx
 
-    cmp cx, 8d              ; is printing sp?
+    cmp cx, 5d              ; is printing sp?
     jne EndPrValue
 
     add bx, 16d              ; then move further
@@ -303,7 +303,7 @@ DrawLine proc
     endp
 ;================================================================
 Style:      db 201, 205, 187, 186, 0, 186, 200, 205, 188
-Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
+Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:"
 Numbers:    db "0123456789ABCDEF"
 
 FileEnd:

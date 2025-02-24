@@ -1,4 +1,4 @@
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 1
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 1
 resident.asm
 
 
@@ -43,7 +43,7 @@ resident.asm
      38	0125  E6 20			     out 20h, al
      39
      40	0127  B8 3100			     mov ax, 3100h	      ;	exit and stay resident
-     41	012A  BA 0298r			     mov dx, offset FileEnd   ;	set mem	size
+     41	012A  BA 0295r			     mov dx, offset FileEnd   ;	set mem	size
      42	012D  D1 EA D1 EA D1 EA	D1+	     shr dx, 4h		      ;	size /=	4
      43	      EA
      44	0135  42			     inc dx		      ;	size++
@@ -60,7 +60,7 @@ resident.asm
      55				     ;Interupt handler
      56				     ;Comm:
      57				     ;Entry:
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 2
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 2
 resident.asm
 
 
@@ -122,7 +122,7 @@ resident.asm
     112
     113	0172  E8 008E			 call PrintReg
     114
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 3
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 3
 resident.asm
 
 
@@ -161,14 +161,14 @@ resident.asm
     146	0195  36: 8B 17			 mov word ptr dx, ss:[bx]
     147	0198  8B DA			 mov bx, dx
     148
-    149	019A  83 F9 08			 cmp cx, 8d		 ; is printing sp?
+    149	019A  83 F9 05			 cmp cx, 5d		 ; is printing sp?
     150	019D  75 03			 jne EndPrValue
     151
     152	019F  83 C3 10			 add bx, 16d		  ; then move further
     153
     154	01A2				 EndPrValue:
     155
-    156	01A2  BE 0288r			 mov si, offset	Numbers
+    156	01A2  BE 0285r			 mov si, offset	Numbers
     157	01A5  56			 push si
     158
     159	01A6  8B D3			 mov dx, bx		 ;first	byte
@@ -184,7 +184,7 @@ resident.asm
     169
     170	01C8  5E			 pop si
     171	01C9  56			 push si
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 4
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 4
 resident.asm
 
 
@@ -246,7 +246,7 @@ resident.asm
     226
     227	0209  C3			 ret
     228	020A				 endp
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 5
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 5
 resident.asm
 
 
@@ -308,7 +308,7 @@ resident.asm
     283
     284	0237  E8 0013			 call DrawLine
     285
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 6
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 6
 resident.asm
 
 
@@ -358,19 +358,19 @@ resident.asm
     328				     ;================================================================
     329	0258  C9 CD BB BA 00 BA	C8+  Style:	 db 201, 205, 187, 186,	0, 186,	200, 205, 188
     330	      CD BC
-    331	0261  61 78 3A 62 78 3A	63+  Registers:	 db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
+    331	0261  61 78 3A 62 78 3A	63+  Registers:	 db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:"
     332	      78 3A 64 78 3A 73	69+
     333	      3A 64 69 3A 62 70	3A+
     334	      73 70 3A 64 73 3A	65+
     335	      73 3A 73 73 3A 63	73+
-    336	      3A 69 70 3A
-    337	0288  30 31 32 33 34 35	36+  Numbers:	 db "0123456789ABCDEF"
+    336	      3A
+    337	0285  30 31 32 33 34 35	36+  Numbers:	 db "0123456789ABCDEF"
     338	      37 38 39 41 42 43	44+
     339	      45 46
     340
-    341	0298			     FileEnd:
+    341	0295			     FileEnd:
     342				     end Start
-Turbo Assembler	 Version 4.1	    02/24/25 15:22:38	    Page 7
+Turbo Assembler	 Version 4.1	    02/24/25 16:00:09	    Page 7
 Symbol Table
 
 
@@ -380,7 +380,7 @@ Symbol Name			  Type	 Value
 
 ??DATE				  Text	 "02/24/25"
 ??FILENAME			  Text	 "resident"
-??TIME				  Text	 "15:22:38"
+??TIME				  Text	 "16:00:09"
 ??VERSION			  Number 040A
 @32BIT				  Text	 0
 @CODE				  Text	 DGROUP
@@ -398,11 +398,11 @@ CLR_PRMS			  Number 002E
 DRAWLINE			  Near	 DGROUP:024D
 DRAWTABLE			  Near	 DGROUP:020A
 ENDPRVALUE			  Near	 DGROUP:01A2
-FILEEND				  Near	 DGROUP:0298
+FILEEND				  Near	 DGROUP:0295
 HANDLER				  Near	 DGROUP:0138
 LOOP2				  Near	 DGROUP:022D
 LOOP_REG			  Near	 DGROUP:0172
-NUMBERS				  Near	 DGROUP:0288
+NUMBERS				  Near	 DGROUP:0285
 NUM_REGS			  Number 000C
 OLDHDLRADDR			  Word	 DGROUP:016D
 OLDHDLRSEG			  Word	 DGROUP:016F
@@ -423,5 +423,5 @@ Groups & Segments		  Bit Size Align  Combine Class
 
 DGROUP				  Group
   _DATA				  16  0000 Word	  Public  DATA
-  _TEXT				  16  0298 Word	  Public  CODE
+  _TEXT				  16  0295 Word	  Public  CODE
 
