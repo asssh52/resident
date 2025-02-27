@@ -6,11 +6,11 @@ org 100h
 VIDEOSEG  equ 0b800h
 Y_POS     equ 1d
 X_POS     equ 72d
-TBL_HGHT  equ 12d
+TBL_HGHT  equ 13d
 TBL_WDTH  equ 7d
 CLR_PRMS  equ 00101110b
-NUM_REGS  equ 12d
-TTL_REGS  equ 12d
+NUM_REGS  equ 13d
+TTL_REGS  equ 13d
 ;-=-=-=-==--=-=-=-=-=-=-=-==-=
 
 ;------------------------------------------------------------------------------------------------------
@@ -57,7 +57,7 @@ TTL_REGS  equ 12d
 ;======================================================================================================
 Handler proc
 
-    push ax bx cx dx si di bp sp ds es ss cs    ; save condition of registers
+    push ax bx cx dx si di bp sp ds es ss       ; save condition of registers
 
     push cs
     pop ds                                      ; ds in command segment
@@ -77,7 +77,7 @@ Handler proc
 
     call PrintRegs
 
-    pop ax ss es ds sp bp di si dx cx bx ax     ; load condition of registers
+    pop ss es ds sp bp di si dx cx bx ax        ; load condition of registers
 
                  db 0eah                        ; jmp to next handler
     OldHdlrAddr  dw 0h                          ; space for addr to next handler
@@ -126,21 +126,42 @@ PrintValue proc
     mov bx, sp              ; bx = stack_ptr
     add bx, TTL_REGS * 2    ; bx = stack_ptr + 8 * 2 (ss:[bx] == x[0])
     sub bx, NUM_REGS * 2    ; bx -= num_regs_to_show (ss:[bx] == x[num_reg])
-    add cx, 2d              ; stack depth is 3
+
     shl cx, 1d
     add bx, cx              ; bx += counter * 2      (ss:[bx] == x[i])
     shr cx, 1d
-    sub cx, 2d
 
-    mov word ptr dx, ss:[bx]
+
+;-----------------------
+    cmp cx, 2h              ; is printing cs?
+    jne EndPrValueCS
+
+    add bx, 26d             ; then move further
+
+    EndPrValueCS:
+;-----------------------
+
+;-----------------------
+    cmp cx, 1h              ; is printing ip?
+    jne EndPrValueIP
+
+    add bx, 26d             ; then move further
+
+    EndPrValueIP:
+;-----------------------
+
+
+    mov word ptr dx, ss:[bx] ; load reg value
     mov bx, dx
 
+;-----------------------
     cmp cx, 5d              ; is printing sp?
-    jne EndPrValue
+    jne EndPrValueSP
 
-    add bx, 16d              ; then move further
+    add bx, 16d             ; then move further
 
-    EndPrValue:
+    EndPrValueSP:
+;-----------------------
 
     mov si, offset Numbers
     push si
@@ -303,7 +324,7 @@ DrawLine proc
     endp
 ;================================================================
 Style:      db 201, 205, 187, 186, 0, 186, 200, 205, 188
-Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:"
+Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
 Numbers:    db "0123456789ABCDEF"
 
 FileEnd:
