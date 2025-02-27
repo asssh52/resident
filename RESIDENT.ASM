@@ -15,26 +15,55 @@ TTL_REGS  equ 13d
 
 ;------------------------------------------------------------------------------------------------------
 
+;-----------
     Start:
+;-----------
+
+;___________________________________________________________
+;              09H Int Handler Intializer
+;___________________________________________________________
         xor ax, ax
         mov es, ax              ; es = 0
-        mov bx, 09h * 4         ; bx = 9 * 4, each int handler addr is made of 4 bytes
+        mov bx, 09h * 4         ; bx = 8 * 4, each int handler addr is made of 4 bytes
 
         cli                     ; do not allow to interrupt during these lines
         mov ax, es:[bx]         ; save old handler addr
-        mov OldHdlrAddr, ax
+        mov Old09HdlrAddr, ax
         mov ax, es:[bx+2]
-        mov OldHdlrSeg, ax
+        mov Old09HdlrSeg, ax
 
-        mov es:[bx], offset Handler
+        mov es:[bx], offset KeyboardHandler
         push cs
         pop ax
         mov es:[bx+2], ax
         sti
-        int 09h
 
-        mov al, 20h
-        out 20h, al
+;___________________________________________________________
+
+
+
+;___________________________________________________________
+;              08H Int Handler Intializer
+;___________________________________________________________
+        xor ax, ax
+        mov es, ax              ; es = 0
+        mov bx, 08h * 4         ; bx = 8 * 4, each int handler addr is made of 4 bytes
+
+        cli                     ; do not allow to interrupt during these lines
+        mov ax, es:[bx]         ; save old handler addr
+        mov Old08HdlrAddr, ax
+        mov ax, es:[bx+2]
+        mov Old08HdlrSeg, ax
+
+        mov es:[bx], offset TimerHandler
+        push cs
+        pop ax
+        mov es:[bx+2], ax
+        sti
+
+;___________________________________________________________
+;                           Exit
+;___________________________________________________________
 
         mov ax, 3100h            ; exit and stay resident
         mov dx, offset FileEnd   ; set mem size
@@ -45,22 +74,88 @@ TTL_REGS  equ 13d
 
 
 
-
+;______________________________________________________________________________________________________________________
 
 
 ;======================================================================================================
-;Interupt handler
+;Keyboard interupt handler
 ;Comm:
 ;Entry:
 ;Exit: -
 ;Destr:
 ;======================================================================================================
-Handler proc
+KeyboardHandler proc
+
+    push ax bx cx dx si di ds                   ; save condition of registers
+
+    push cs
+    pop ds                                      ; ds in command segment
+
+    mov ax, 0200h
+    int 16h                                     ; get BIOS keyboard info
+    and al, 04h                                 ; leaving only ctrl byte
+
+    mov ah, al
+
+    in al, 60h                                  ; get symbol from PPI port
+
+;---------------------
+    mov bl, byte ptr cs:Active
+
+    cmp ax, 040fh                               ; 0fh == 'CTRL + Tab' scancode
+    jne CheckEnd
+
+    cmp bl, 1h                                  ;                   if (active == 1) active = 0;
+    jne ActivateFrame
+
+    mov byte ptr cs:Active, 0h                  ; Deactivate frame
+    je CheckEnd
+
+    ActivateFrame:                              ;                   else active = 1;
+    mov byte ptr cs:Active, 1h                  ; Activate frame
+;---------------------
+CheckEnd:
+
+    in al, 61h
+    mov ah, al
+    or al, 80h
+    out 61h, al
+    mov al, ah
+    out 61h, al
+
+    mov al, 20h
+    out 20h, al
+
+    pop ds di si dx cx bx ax                    ; load condition of registers
+
+
+                 db 0eah                        ; jmp to next handler
+    Old09HdlrAddr  dw 0h                        ; space for addr to next handler
+    Old09HdlrSeg   dw 0h
+
+
+    iret
+    endp
+;======================================================================================================
+
+
+;======================================================================================================
+;Timer interupt handler
+;Comm:
+;Entry:
+;Exit: -
+;Destr:
+;======================================================================================================
+TimerHandler proc
 
     push ax bx cx dx si di bp sp ds es ss       ; save condition of registers
 
     push cs
     pop ds                                      ; ds in command segment
+
+    mov al, byte ptr cs:Active                  ; check run condition
+    cmp al, 0h
+    je HandlerEnd
 
     mov ax, VIDEOSEG                            ; preapre to print chars
     mov es, ax
@@ -77,16 +172,22 @@ Handler proc
 
     call PrintRegs
 
+
+    HandlerEnd:
+
+    mov al, 20h
+    out 20h, al
+
     pop ss es ds sp bp di si dx cx bx ax        ; load condition of registers
 
                  db 0eah                        ; jmp to next handler
-    OldHdlrAddr  dw 0h                          ; space for addr to next handler
-    OldHdlrSeg   dw 0h
+    Old08HdlrAddr  dw 0h                        ; space for addr to next handler
+    Old08HdlrSeg   dw 0h
 
 
     iret
     endp
-
+;======================================================================================================
 
 
 
@@ -104,7 +205,7 @@ LOOP_REG:
 
     call PrintReg
 
-    push si
+    push si                   ; save si
     call PrintValue
     pop si
     add di, 160d - 14d        ; move to next line
@@ -326,6 +427,7 @@ DrawLine proc
 Style:      db 201, 205, 187, 186, 0, 186, 200, 205, 188
 Registers:  db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
 Numbers:    db "0123456789ABCDEF"
+Active:     db 0
 
 FileEnd:
 end Start

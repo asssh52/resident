@@ -1,4 +1,4 @@
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 1
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 1
 resident.asm
 
 
@@ -21,382 +21,499 @@ resident.asm
      16				     ;-----------------------------------------------------------------------------------------------
      17				     -------
      18
-     19	0100				 Start:
-     20	0100  33 C0			     xor ax, ax
-     21	0102  8E C0			     mov es, ax		     ; es = 0
-     22	0104  BB 0024			     mov bx, 09h * 4	     ; bx = 9 *	4, each	int handler addr is made of 4 bytes
-     23
-     24	0107  FA			     cli		     ; do not allow to interrupt during	these lines
-     25	0108  26: 8B 07			     mov ax, es:[bx]	     ; save old	handler	addr
-     26	010B  A3 016Br			     mov OldHdlrAddr, ax
-     27	010E  26: 8B 47	02		     mov ax, es:[bx+2]
-     28	0112  A3 016Dr			     mov OldHdlrSeg, ax
+     19				     ;-----------
+     20	0100				 Start:
+     21				     ;-----------
+     22
+     23				     ;___________________________________________________________
+     24				     ;		    09H	Int Handler Intializer
+     25				     ;___________________________________________________________
+     26	0100  33 C0			     xor ax, ax
+     27	0102  8E C0			     mov es, ax		     ; es = 0
+     28	0104  BB 0024			     mov bx, 09h * 4	     ; bx = 8 *	4, each	int handler addr is made of 4 bytes
      29
-     30	0115  26: C7 07	0138r		     mov es:[bx], offset Handler
-     31	011A  0E			     push cs
-     32	011B  58			     pop ax
-     33	011C  26: 89 47	02		     mov es:[bx+2], ax
-     34	0120  FB			     sti
-     35	0121  CD 09			     int 09h
-     36
-     37	0123  B0 20			     mov al, 20h
-     38	0125  E6 20			     out 20h, al
-     39
-     40	0127  B8 3100			     mov ax, 3100h	      ;	exit and stay resident
-     41	012A  BA 02A0r			     mov dx, offset FileEnd   ;	set mem	size
-     42	012D  D1 EA D1 EA D1 EA	D1+	     shr dx, 4h		      ;	size /=	4
-     43	      EA
-     44	0135  42			     inc dx		      ;	size++
-     45	0136  CD 21			     int 21h		      ;	dos_func
-     46
-     47
-     48
-     49
-     50
-     51
+     30	0107  FA			     cli		     ; do not allow to interrupt during	these lines
+     31	0108  26: 8B 07			     mov ax, es:[bx]	     ; save old	handler	addr
+     32	010B  A3 019Cr			     mov Old09HdlrAddr,	ax
+     33	010E  26: 8B 47	02		     mov ax, es:[bx+2]
+     34	0112  A3 019Er			     mov Old09HdlrSeg, ax
+     35
+     36	0115  26: C7 07	0153r		     mov es:[bx], offset KeyboardHandler
+     37	011A  0E			     push cs
+     38	011B  58			     pop ax
+     39	011C  26: 89 47	02		     mov es:[bx+2], ax
+     40	0120  FB			     sti
+     41
+     42				     ;___________________________________________________________
+     43
+     44
+     45
+     46				     ;___________________________________________________________
+     47				     ;		    08H	Int Handler Intializer
+     48				     ;___________________________________________________________
+     49	0121  33 C0			     xor ax, ax
+     50	0123  8E C0			     mov es, ax		     ; es = 0
+     51	0125  BB 0020			     mov bx, 08h * 4	     ; bx = 8 *	4, each	int handler addr is made of 4 bytes
      52
-     53				     ;===============================================================================================
-     54				     =======
-     55				     ;Interupt handler
-     56				     ;Comm:
-     57				     ;Entry:
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 2
+     53	0128  FA			     cli		     ; do not allow to interrupt during	these lines
+     54	0129  26: 8B 07			     mov ax, es:[bx]	     ; save old	handler	addr
+     55	012C  A3 01E0r			     mov Old08HdlrAddr,	ax
+     56	012F  26: 8B 47	02		     mov ax, es:[bx+2]
+     57	0133  A3 01E2r			     mov Old08HdlrSeg, ax
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 2
 resident.asm
 
 
 
-     58				     ;Exit: -
-     59				     ;Destr:
-     60				     ;===============================================================================================
-     61				     =======
-     62	0138			     Handler proc
-     63
-     64	0138  50 53 51 52 56 57	55+	 push ax bx cx dx si di	bp sp ds es ss	     ; save condition of registers
-     65	      54 1E 06 16
-     66
-     67	0143  0E			 push cs
-     68	0144  1F			 pop ds					     ; ds in command segment
-     69
-     70	0145  B8 B800			 mov ax, VIDEOSEG			     ; preapre to print	chars
-     71	0148  8E C0			 mov es, ax
-     72
-     73	014A  B4 2E			 mov ah, CLR_PRMS			     ; color attr
-     74	014C  BB 0260r			 mov bx, offset	Style
-     75	014F  B2 0D			 mov dl, TBL_HGHT			     ; height
-     76	0151  B6 07			 mov dh, TBL_WDTH			     ; width
+     58
+     59	0136  26: C7 07	01A1r		     mov es:[bx], offset TimerHandler
+     60	013B  0E			     push cs
+     61	013C  58			     pop ax
+     62	013D  26: 89 47	02		     mov es:[bx+2], ax
+     63	0141  FB			     sti
+     64
+     65				     ;___________________________________________________________
+     66				     ;				 Exit
+     67				     ;___________________________________________________________
+     68
+     69	0142  B8 3100			     mov ax, 3100h	      ;	exit and stay resident
+     70	0145  BA 0316r			     mov dx, offset FileEnd   ;	set mem	size
+     71	0148  D1 EA D1 EA D1 EA	D1+	     shr dx, 4h		      ;	size /=	4
+     72	      EA
+     73	0150  42			     inc dx		      ;	size++
+     74	0151  CD 21			     int 21h		      ;	dos_func
+     75
+     76
      77
-     78	0153  E8 00BC			 call DrawTable
-     79
-     80	0156  BF 01D0			 mov di, (Y_POS	+ 1) * 160d + X_POS * 2d     ; pos to print first line
-     81	0159  B9 000D			 mov cx, NUM_REGS
+     78
+     79				     ;_______________________________________________________________________________________________
+     80				     _______________________
+     81
      82
-     83	015C  E8 0011			 call PrintRegs
-     84
-     85	015F  17 07 1F 5C 5D 5F	5E+	 pop ss	es ds sp bp di si dx cx	bx ax	     ; load condition of registers
-     86	      5A 59 5B 58
-     87
-     88	016A  EA				      db 0eah			     ; jmp to next handler
-     89	016B  0000			 OldHdlrAddr  dw 0h			     ; space for addr to next handler
-     90	016D  0000			 OldHdlrSeg   dw 0h
-     91
-     92
-     93	016F  CF			 iret
-     94	0170				 endp
+     83				     ;===============================================================================================
+     84				     =======
+     85				     ;Keyboard interupt	handler
+     86				     ;Comm:
+     87				     ;Entry:
+     88				     ;Exit: -
+     89				     ;Destr:
+     90				     ;===============================================================================================
+     91				     =======
+     92	0153			     KeyboardHandler proc
+     93
+     94	0153  50 53 51 52 56 57	1E	 push ax bx cx dx si di	ds		     ; save condition of registers
      95
-     96
-     97
+     96	015A  0E			 push cs
+     97	015B  1F			 pop ds					     ; ds in command segment
      98
-     99
-    100
-    101				     ;===============================================================================================
-    102				     =======
-    103				     ;Comm: Print registers to ES:DI, DS:SI addr to reg	name, color params AH, CX - num	regs to	print
-    104				     ;Entry: ES:DI, DS:SI, CX
-    105				     ;Exit: -
-    106				     ;Destr: DI, SI, CX
-    107				     ;===============================================================================================
-    108				     =======
-    109	0170			     PrintRegs proc
-    110
-    111	0170			     LOOP_REG:
+     99	015C  B8 0200			 mov ax, 0200h
+    100	015F  CD 16			 int 16h				     ; get BIOS	keyboard info
+    101	0161  24 04			 and al, 04h				     ; leaving only ctrl byte
+    102
+    103	0163  8A E0			 mov ah, al
+    104
+    105	0165  E4 60			 in al,	60h				     ; get symbol from PPI port
+    106
+    107				     ;---------------------
+    108	0167  2E: 8A 1E	0315r		 mov bl, byte ptr cs:Active
+    109
+    110	016C  3D 040F			 cmp ax, 040fh				     ; 0fh == 'CTRL + Tab' scancode
+    111	016F  75 13			 jne CheckEnd
     112
-    113	0170  E8 0098			 call PrintReg
-    114
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 3
+    113	0171  80 FB 01			 cmp bl, 1h				     ;			 if (active == 1) active = 0;
+    114	0174  75 08			 jne ActivateFrame
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 3
 resident.asm
 
 
 
-    115	0173  56			 push si
-    116	0174  E8 0008			 call PrintValue
-    117	0177  5E			 pop si
-    118	0178  81 C7 0092		 add di, 160d -	14d	   ; move to next line
-    119
-    120	017C  E2 F2			 loop LOOP_REG
-    121
-    122	017E  C3			 ret
-    123	017F				 endp
-    124				     ;===============================================================================================
-    125				     =======
-    126
-    127				     ;===============================================================================================
-    128				     =======
-    129				     ;Comm: Print value	of registers stored in
-    130				     ;Entry:
-    131				     ;Exit: -
-    132				     ;Destr:
-    133				     ;===============================================================================================
-    134				     =======
-    135	017F			     PrintValue	proc
+    115
+    116	0176  2E: C6 06	0315r 00	 mov byte ptr cs:Active, 0h		     ; Deactivate frame
+    117	017C  74 06			 je CheckEnd
+    118
+    119	017E				 ActivateFrame:				     ;			 else active = 1;
+    120	017E  2E: C6 06	0315r 01	 mov byte ptr cs:Active, 1h		     ; Activate	frame
+    121				     ;---------------------
+    122	0184			     CheckEnd:
+    123
+    124	0184  E4 61			 in al,	61h
+    125	0186  8A E0			 mov ah, al
+    126	0188  0C 80			 or al,	80h
+    127	018A  E6 61			 out 61h, al
+    128	018C  8A C4			 mov al, ah
+    129	018E  E6 61			 out 61h, al
+    130
+    131	0190  B0 20			 mov al, 20h
+    132	0192  E6 20			 out 20h, al
+    133
+    134	0194  1F 5F 5E 5A 59 5B	58	 pop ds	di si dx cx bx ax		     ; load condition of registers
+    135
     136
-    137	017F  8B DC			 mov bx, sp		 ; bx =	stack_ptr
-    138	0181  83 C3 1A			 add bx, TTL_REGS * 2	 ; bx =	stack_ptr + 8 *	2 (ss:[bx] == x[0])
-    139	0184  83 EB 1A			 sub bx, NUM_REGS * 2	 ; bx -= num_regs_to_show (ss:[bx] == x[num_reg])
+    137	019B  EA				      db 0eah			     ; jmp to next handler
+    138	019C  0000			 Old09HdlrAddr	dw 0h			     ; space for addr to next handler
+    139	019E  0000			 Old09HdlrSeg	dw 0h
     140
-    141	0187  D1 E1			 shl cx, 1d
-    142	0189  03 D9			 add bx, cx		 ; bx += counter * 2	  (ss:[bx] == x[i])
-    143	018B  D1 E9			 shr cx, 1d
-    144
-    145
-    146				     ;-----------------------
-    147	018D  83 F9 02			 cmp cx, 2h		 ; is printing cs?
-    148	0190  75 03			 jne EndPrValueCS
-    149
-    150	0192  83 C3 1A			 add bx, 26d		 ; then	move further
-    151
-    152	0195				 EndPrValueCS:
-    153				     ;-----------------------
-    154
-    155				     ;-----------------------
-    156	0195  83 F9 01			 cmp cx, 1h		 ; is printing ip?
-    157	0198  75 03			 jne EndPrValueIP
+    141
+    142	01A0  CF			 iret
+    143	01A1				 endp
+    144				     ;===============================================================================================
+    145				     =======
+    146
+    147
+    148				     ;===============================================================================================
+    149				     =======
+    150				     ;Timer interupt handler
+    151				     ;Comm:
+    152				     ;Entry:
+    153				     ;Exit: -
+    154				     ;Destr:
+    155				     ;===============================================================================================
+    156				     =======
+    157	01A1			     TimerHandler proc
     158
-    159	019A  83 C3 1A			 add bx, 26d		 ; then	move further
-    160
-    161	019D				 EndPrValueIP:
-    162				     ;-----------------------
-    163
+    159	01A1  50 53 51 52 56 57	55+	 push ax bx cx dx si di	bp sp ds es ss	     ; save condition of registers
+    160	      54 1E 06 16
+    161
+    162	01AC  0E			 push cs
+    163	01AD  1F			 pop ds					     ; ds in command segment
     164
-    165	019D  36: 8B 17			 mov word ptr dx, ss:[bx] ; load reg value
-    166	01A0  8B DA			 mov bx, dx
-    167
-    168				     ;-----------------------
-    169	01A2  83 F9 05			 cmp cx, 5d		 ; is printing sp?
-    170	01A5  75 03			 jne EndPrValueSP
+    165	01AE  2E: A0 0315r		 mov al, byte ptr cs:Active		     ; check run condition
+    166	01B2  3C 00			 cmp al, 0h
+    167	01B4  74 1A			 je HandlerEnd
+    168
+    169	01B6  B8 B800			 mov ax, VIDEOSEG			     ; preapre to print	chars
+    170	01B9  8E C0			 mov es, ax
     171
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 4
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 4
 resident.asm
 
 
 
-    172	01A7  83 C3 10			 add bx, 16d		 ; then	move further
-    173
-    174	01AA				 EndPrValueSP:
-    175				     ;-----------------------
+    172	01BB  B4 2E			 mov ah, CLR_PRMS			     ; color attr
+    173	01BD  BB 02D5r			 mov bx, offset	Style
+    174	01C0  B2 0D			 mov dl, TBL_HGHT			     ; height
+    175	01C2  B6 07			 mov dh, TBL_WDTH			     ; width
     176
-    177	01AA  BE 0290r			 mov si, offset	Numbers
-    178	01AD  56			 push si
-    179
-    180	01AE  8B D3			 mov dx, bx		 ;first	byte
-    181	01B0  81 E2 F000		 and dx, 0F000h
-    182	01B4  D1 EA D1 EA D1 EA	D1+	 shr dx, 12d
-    183	      EA D1 EA D1 EA D1	EA+
-    184	      D1 EA D1 EA D1 EA	D1+
-    185	      EA D1 EA
+    177	01C4  E8 00C0			 call DrawTable
+    178
+    179	01C7  BF 01D0			 mov di, (Y_POS	+ 1) * 160d + X_POS * 2d     ; pos to print first line
+    180	01CA  B9 000D			 mov cx, NUM_REGS
+    181
+    182	01CD  E8 0015			 call PrintRegs
+    183
+    184
+    185	01D0				 HandlerEnd:
     186
-    187	01CC  03 F2			 add si, dx
-    188	01CE  AC			 lodsb
-    189	01CF  AB			 stosw
-    190
-    191	01D0  5E			 pop si
-    192	01D1  56			 push si
-    193
-    194	01D2  8B D3			 mov dx, bx		 ;second byte
-    195	01D4  81 E2 0F00		 and dx, 0F00h
-    196	01D8  D1 EA D1 EA D1 EA	D1+	 shr dx, 8d
-    197	      EA D1 EA D1 EA D1	EA+
-    198	      D1 EA
-    199	01E8  03 F2			 add si, dx
-    200	01EA  AC			 lodsb
-    201	01EB  AB			 stosw
+    187	01D0  B0 20			 mov al, 20h
+    188	01D2  E6 20			 out 20h, al
+    189
+    190	01D4  17 07 1F 5C 5D 5F	5E+	 pop ss	es ds sp bp di si dx cx	bx ax	     ; load condition of registers
+    191	      5A 59 5B 58
+    192
+    193	01DF  EA				      db 0eah			     ; jmp to next handler
+    194	01E0  0000			 Old08HdlrAddr	dw 0h			     ; space for addr to next handler
+    195	01E2  0000			 Old08HdlrSeg	dw 0h
+    196
+    197
+    198	01E4  CF			 iret
+    199	01E5				 endp
+    200				     ;===============================================================================================
+    201				     =======
     202
-    203	01EC  5E			 pop si
-    204	01ED  56			 push si
+    203
+    204
     205
-    206	01EE  8B D3			 mov dx, bx		 ;third	byte
-    207	01F0  81 E2 00F0		 and dx, 00F0h
-    208	01F4  D1 EA D1 EA D1 EA	D1+	 shr dx, 4d
-    209	      EA
-    210	01FC  03 F2			 add si, dx
-    211	01FE  AC			 lodsb
-    212	01FF  AB			 stosw
-    213
-    214	0200  5E			 pop si
-    215
-    216	0201  8B D3			 mov dx, bx		 ;fourth byte
-    217	0203  83 E2 0F			 and dx, 000Fh
-    218					 ;shr
-    219	0206  03 F2			 add si, dx
-    220	0208  AC			 lodsb
-    221	0209  AB			 stosw
-    222
-    223
-    224	020A  C3			 ret
-    225	020B				 endp
-    226				     ;===============================================================================================
-    227				     =======
-    228
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 5
+    206
+    207				     ;===============================================================================================
+    208				     =======
+    209				     ;Comm: Print registers to ES:DI, DS:SI addr to reg	name, color params AH, CX - num	regs to	print
+    210				     ;Entry: ES:DI, DS:SI, CX
+    211				     ;Exit: -
+    212				     ;Destr: DI, SI, CX
+    213				     ;===============================================================================================
+    214				     =======
+    215	01E5			     PrintRegs proc
+    216
+    217	01E5			     LOOP_REG:
+    218
+    219	01E5  E8 0098			 call PrintReg
+    220
+    221	01E8  56			 push si		   ; save si
+    222	01E9  E8 0008			 call PrintValue
+    223	01EC  5E			 pop si
+    224	01ED  81 C7 0092		 add di, 160d -	14d	   ; move to next line
+    225
+    226	01F1  E2 F2			 loop LOOP_REG
+    227
+    228	01F3  C3			 ret
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 5
 resident.asm
 
 
 
-    229				     ;===============================================================================================
-    230				     =======
-    231				     ;Comm: Print register to ES:DI, DS:SI addr	to reg name, color params AH
-    232				     ;Entry: AH, ES:DI,	DS:SI
-    233				     ;Exit: -
-    234				     ;Destr: DI, SI
-    235				     ;===============================================================================================
-    236				     =======
-    237	020B			     PrintReg proc
-    238
-    239	020B  AC			 lodsb
-    240	020C  AB			 stosw
-    241
-    242	020D  AC			 lodsb
-    243	020E  AB			 stosw
-    244
-    245	020F  AC			 lodsb
-    246	0210  AB			 stosw
-    247
-    248	0211  C3			 ret
-    249	0212				 endp
-    250				     ;===============================================================================================
-    251				     =======
-    252
-    253
-    254
+    229	01F4				 endp
+    230				     ;===============================================================================================
+    231				     =======
+    232
+    233				     ;===============================================================================================
+    234				     =======
+    235				     ;Comm: Print value	of registers stored in
+    236				     ;Entry:
+    237				     ;Exit: -
+    238				     ;Destr:
+    239				     ;===============================================================================================
+    240				     =======
+    241	01F4			     PrintValue	proc
+    242
+    243	01F4  8B DC			 mov bx, sp		 ; bx =	stack_ptr
+    244	01F6  83 C3 1A			 add bx, TTL_REGS * 2	 ; bx =	stack_ptr + 8 *	2 (ss:[bx] == x[0])
+    245	01F9  83 EB 1A			 sub bx, NUM_REGS * 2	 ; bx -= num_regs_to_show (ss:[bx] == x[num_reg])
+    246
+    247	01FC  D1 E1			 shl cx, 1d
+    248	01FE  03 D9			 add bx, cx		 ; bx += counter * 2	  (ss:[bx] == x[i])
+    249	0200  D1 E9			 shr cx, 1d
+    250
+    251
+    252				     ;-----------------------
+    253	0202  83 F9 02			 cmp cx, 2h		 ; is printing cs?
+    254	0205  75 03			 jne EndPrValueCS
     255
-    256				     ;===============================================================================================
-    257				     =======
-    258				     ;Comm: Color params AH, DS:BX addr	of 9 byte char seq, DL - height, DH - width
-    259				     ;Entry: AH, DS:BX,	DL, DH
-    260				     ;Exit: -
-    261				     ;Destr: AL, BX, CX, SI, DX, ES
-    262				     ;===============================================================================================
-    263				     =======
-    264	0212			     DrawTable proc
-    265
-    266	0212  33 C9			 xor cx, cx
-    267	0214  8A CE			 mov cl, dh		     ; width
-    268
-    269	0216  32 C0			 xor al, al		     ; al = 0
-    270	0218  50			 push ax		     ; save ah
-    271
-    272	0219  B8 B800			 mov ax, VIDEOSEG
-    273	021C  8E C0			 mov es, ax		     ; preapre to print	chars
-    274
-    275	021E  B8 00A0			 mov ax, Y_POS * 160d	     ; Y pos
-    276
-    277	0221  8B F8			 mov di, ax		     ; place 160dl to di
-    278
-    279	0223  B8 0090			 mov ax, X_POS * 2	     ; X pos
-    280
-    281	0226  03 F8			 add di, ax		     ; width things
+    256	0207  83 C3 1A			 add bx, 26d		 ; then	move further
+    257
+    258	020A				 EndPrValueCS:
+    259				     ;-----------------------
+    260
+    261				     ;-----------------------
+    262	020A  83 F9 01			 cmp cx, 1h		 ; is printing ip?
+    263	020D  75 03			 jne EndPrValueIP
+    264
+    265	020F  83 C3 1A			 add bx, 26d		 ; then	move further
+    266
+    267	0212				 EndPrValueIP:
+    268				     ;-----------------------
+    269
+    270
+    271	0212  36: 8B 17			 mov word ptr dx, ss:[bx] ; load reg value
+    272	0215  8B DA			 mov bx, dx
+    273
+    274				     ;-----------------------
+    275	0217  83 F9 05			 cmp cx, 5d		 ; is printing sp?
+    276	021A  75 03			 jne EndPrValueSP
+    277
+    278	021C  83 C3 10			 add bx, 16d		 ; then	move further
+    279
+    280	021F				 EndPrValueSP:
+    281				     ;-----------------------
     282
-    283
-    284	0228  58			 pop ax			     ; return ah (color	attr)
-    285	0229  57			 push di		     ; save video addr for next	iteration
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 6
+    283	021F  BE 0305r			 mov si, offset	Numbers
+    284	0222  56			 push si
+    285
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 6
 resident.asm
 
 
 
-    286	022A  8B F3			 mov si, bx		     ; symbol addr
-    287
-    288	022C  E8 0026			 call DrawLine
-    289
-    290	022F  5F			 pop di			     ;
-    291	0230  8A CA			 mov cl, dl
+    286	0223  8B D3			 mov dx, bx		 ;first	byte
+    287	0225  81 E2 F000		 and dx, 0F000h
+    288	0229  D1 EA D1 EA D1 EA	D1+	 shr dx, 12d
+    289	      EA D1 EA D1 EA D1	EA+
+    290	      D1 EA D1 EA D1 EA	D1+
+    291	      EA D1 EA
     292
-    293
-    294	0232  83 C3 03			 add bx, 3d		     ; "move" symbols
-    295				     ;---------------------------------
+    293	0241  03 F2			 add si, dx
+    294	0243  AC			 lodsb
+    295	0244  AB			 stosw
     296
-    297	0235			     Loop2:
-    298	0235  51			 push cx		     ; save counter
+    297	0245  5E			 pop si
+    298	0246  56			 push si
     299
-    300	0236  81 C7 00A0		 add di, 160d
-    301	023A  57			 push di		     ; save offset
-    302	023B  8A CE			 mov cl, dh		     ; prepare line counter
-    303	023D  8B F3			 mov si, bx		     ; symbol addr
-    304
-    305	023F  E8 0013			 call DrawLine
-    306
-    307	0242  5F			 pop di			     ; load offset
-    308	0243  59			 pop cx			     ; load counter
-    309
-    310	0244  E2 EF			 loop Loop2
+    300	0247  8B D3			 mov dx, bx		 ;second byte
+    301	0249  81 E2 0F00		 and dx, 0F00h
+    302	024D  D1 EA D1 EA D1 EA	D1+	 shr dx, 8d
+    303	      EA D1 EA D1 EA D1	EA+
+    304	      D1 EA
+    305	025D  03 F2			 add si, dx
+    306	025F  AC			 lodsb
+    307	0260  AB			 stosw
+    308
+    309	0261  5E			 pop si
+    310	0262  56			 push si
     311
-    312				     ;---------------------------------
-    313
-    314	0246  83 C3 03			 add bx, 3d		     ; "move" symbols
-    315	0249  81 C7 00A0		 add di, 160d
-    316	024D  8A CE			 mov cl, dh		     ; prepare line counter
-    317	024F  8B F3			 mov si, bx		     ; symbol addr
-    318
-    319	0251  E8 0001			 call DrawLine		     ; draw final line
-    320
-    321	0254  C3			 ret
-    322	0255				 endp
-    323
-    324				     ;===============================================================================================
-    325				     =======
-    326
-    327				     ;================================================================
-    328				     ;DrawLine
-    329				     ;Comm: Color params AH, DS:SI addr	of 3 byte char seq, CX - length, ES:DI addr begin
-    330				     ;Entry: AH, DS:SI,	CX, ES:DI
-    331				     ;Exit: -
-    332				     ;Destr: CX, SI, DI
-    333				     ;================================================================
-    334	0255			     DrawLine proc
-    335
-    336	0255  83 EF 02			 sub di, 2d
-    337
-    338	0258  AC			 lodsb			     ; load  first char
-    339	0259  AB			 stosw			     ; place first char
-    340
-    341	025A  AC			 lodsb			     ; load second char
-    342	025B  F3> AB			 rep stosw		     ; until CX	!= 0 place second char
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 7
+    312	0263  8B D3			 mov dx, bx		 ;third	byte
+    313	0265  81 E2 00F0		 and dx, 00F0h
+    314	0269  D1 EA D1 EA D1 EA	D1+	 shr dx, 4d
+    315	      EA
+    316	0271  03 F2			 add si, dx
+    317	0273  AC			 lodsb
+    318	0274  AB			 stosw
+    319
+    320	0275  5E			 pop si
+    321
+    322	0276  8B D3			 mov dx, bx		 ;fourth byte
+    323	0278  83 E2 0F			 and dx, 000Fh
+    324					 ;shr
+    325	027B  03 F2			 add si, dx
+    326	027D  AC			 lodsb
+    327	027E  AB			 stosw
+    328
+    329
+    330	027F  C3			 ret
+    331	0280				 endp
+    332				     ;===============================================================================================
+    333				     =======
+    334
+    335				     ;===============================================================================================
+    336				     =======
+    337				     ;Comm: Print register to ES:DI, DS:SI addr	to reg name, color params AH
+    338				     ;Entry: AH, ES:DI,	DS:SI
+    339				     ;Exit: -
+    340				     ;Destr: DI, SI
+    341				     ;===============================================================================================
+    342				     =======
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 7
 resident.asm
 
 
 
-    343
-    344	025D  AC			 lodsb			     ; load  third char
-    345	025E  AB			 stosw			     ; place third char
-    346
-    347	025F  C3			 ret
-    348	0260				 endp
-    349				     ;================================================================
-    350	0260  C9 CD BB BA 00 BA	C8+  Style:	 db 201, 205, 187, 186,	0, 186,	200, 205, 188
-    351	      CD BC
-    352	0269  61 78 3A 62 78 3A	63+  Registers:	 db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
-    353	      78 3A 64 78 3A 73	69+
-    354	      3A 64 69 3A 62 70	3A+
-    355	      73 70 3A 64 73 3A	65+
-    356	      73 3A 73 73 3A 63	73+
-    357	      3A 69 70 3A
-    358	0290  30 31 32 33 34 35	36+  Numbers:	 db "0123456789ABCDEF"
-    359	      37 38 39 41 42 43	44+
-    360	      45 46
+    343	0280			     PrintReg proc
+    344
+    345	0280  AC			 lodsb
+    346	0281  AB			 stosw
+    347
+    348	0282  AC			 lodsb
+    349	0283  AB			 stosw
+    350
+    351	0284  AC			 lodsb
+    352	0285  AB			 stosw
+    353
+    354	0286  C3			 ret
+    355	0287				 endp
+    356				     ;===============================================================================================
+    357				     =======
+    358
+    359
+    360
     361
-    362	02A0			     FileEnd:
-    363				     end Start
-Turbo Assembler	 Version 4.1	    02/27/25 20:17:41	    Page 8
+    362				     ;===============================================================================================
+    363				     =======
+    364				     ;Comm: Color params AH, DS:BX addr	of 9 byte char seq, DL - height, DH - width
+    365				     ;Entry: AH, DS:BX,	DL, DH
+    366				     ;Exit: -
+    367				     ;Destr: AL, BX, CX, SI, DX, ES
+    368				     ;===============================================================================================
+    369				     =======
+    370	0287			     DrawTable proc
+    371
+    372	0287  33 C9			 xor cx, cx
+    373	0289  8A CE			 mov cl, dh		     ; width
+    374
+    375	028B  32 C0			 xor al, al		     ; al = 0
+    376	028D  50			 push ax		     ; save ah
+    377
+    378	028E  B8 B800			 mov ax, VIDEOSEG
+    379	0291  8E C0			 mov es, ax		     ; preapre to print	chars
+    380
+    381	0293  B8 00A0			 mov ax, Y_POS * 160d	     ; Y pos
+    382
+    383	0296  8B F8			 mov di, ax		     ; place 160dl to di
+    384
+    385	0298  B8 0090			 mov ax, X_POS * 2	     ; X pos
+    386
+    387	029B  03 F8			 add di, ax		     ; width things
+    388
+    389
+    390	029D  58			 pop ax			     ; return ah (color	attr)
+    391	029E  57			 push di		     ; save video addr for next	iteration
+    392	029F  8B F3			 mov si, bx		     ; symbol addr
+    393
+    394	02A1  E8 0026			 call DrawLine
+    395
+    396	02A4  5F			 pop di			     ;
+    397	02A5  8A CA			 mov cl, dl
+    398
+    399
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 8
+resident.asm
+
+
+
+    400	02A7  83 C3 03			 add bx, 3d		     ; "move" symbols
+    401				     ;---------------------------------
+    402
+    403	02AA			     Loop2:
+    404	02AA  51			 push cx		     ; save counter
+    405
+    406	02AB  81 C7 00A0		 add di, 160d
+    407	02AF  57			 push di		     ; save offset
+    408	02B0  8A CE			 mov cl, dh		     ; prepare line counter
+    409	02B2  8B F3			 mov si, bx		     ; symbol addr
+    410
+    411	02B4  E8 0013			 call DrawLine
+    412
+    413	02B7  5F			 pop di			     ; load offset
+    414	02B8  59			 pop cx			     ; load counter
+    415
+    416	02B9  E2 EF			 loop Loop2
+    417
+    418				     ;---------------------------------
+    419
+    420	02BB  83 C3 03			 add bx, 3d		     ; "move" symbols
+    421	02BE  81 C7 00A0		 add di, 160d
+    422	02C2  8A CE			 mov cl, dh		     ; prepare line counter
+    423	02C4  8B F3			 mov si, bx		     ; symbol addr
+    424
+    425	02C6  E8 0001			 call DrawLine		     ; draw final line
+    426
+    427	02C9  C3			 ret
+    428	02CA				 endp
+    429
+    430				     ;===============================================================================================
+    431				     =======
+    432
+    433				     ;================================================================
+    434				     ;DrawLine
+    435				     ;Comm: Color params AH, DS:SI addr	of 3 byte char seq, CX - length, ES:DI addr begin
+    436				     ;Entry: AH, DS:SI,	CX, ES:DI
+    437				     ;Exit: -
+    438				     ;Destr: CX, SI, DI
+    439				     ;================================================================
+    440	02CA			     DrawLine proc
+    441
+    442	02CA  83 EF 02			 sub di, 2d
+    443
+    444	02CD  AC			 lodsb			     ; load  first char
+    445	02CE  AB			 stosw			     ; place first char
+    446
+    447	02CF  AC			 lodsb			     ; load second char
+    448	02D0  F3> AB			 rep stosw		     ; until CX	!= 0 place second char
+    449
+    450	02D2  AC			 lodsb			     ; load  third char
+    451	02D3  AB			 stosw			     ; place third char
+    452
+    453	02D4  C3			 ret
+    454	02D5				 endp
+    455				     ;================================================================
+    456	02D5  C9 CD BB BA 00 BA	C8+  Style:	 db 201, 205, 187, 186,	0, 186,	200, 205, 188
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 9
+resident.asm
+
+
+
+    457	      CD BC
+    458	02DE  61 78 3A 62 78 3A	63+  Registers:	 db "ax:bx:cx:dx:si:di:bp:sp:ds:es:ss:cs:ip:"
+    459	      78 3A 64 78 3A 73	69+
+    460	      3A 64 69 3A 62 70	3A+
+    461	      73 70 3A 64 73 3A	65+
+    462	      73 3A 73 73 3A 63	73+
+    463	      3A 69 70 3A
+    464	0305  30 31 32 33 34 35	36+  Numbers:	 db "0123456789ABCDEF"
+    465	      37 38 39 41 42 43	44+
+    466	      45 46
+    467	0315  00		     Active:	 db 0
+    468
+    469	0316			     FileEnd:
+    470				     end Start
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 10
 Symbol Table
 
 
@@ -406,7 +523,7 @@ Symbol Name			  Type	 Value
 
 ??DATE				  Text	 "02/27/25"
 ??FILENAME			  Text	 "resident"
-??TIME				  Text	 "20:17:41"
+??TIME				  Text	 "23:09:16"
 ??VERSION			  Number 040A
 @32BIT				  Text	 0
 @CODE				  Text	 DGROUP
@@ -420,36 +537,48 @@ Symbol Name			  Type	 Value
 @MODEL				  Text	 1
 @STACK				  Text	 DGROUP
 @WORDSIZE			  Text	 2
+ACTIVATEFRAME			  Near	 DGROUP:017E
+ACTIVE				  Near	 DGROUP:0315
+CHECKEND			  Near	 DGROUP:0184
 CLR_PRMS			  Number 002E
-DRAWLINE			  Near	 DGROUP:0255
-DRAWTABLE			  Near	 DGROUP:0212
-ENDPRVALUECS			  Near	 DGROUP:0195
-ENDPRVALUEIP			  Near	 DGROUP:019D
-ENDPRVALUESP			  Near	 DGROUP:01AA
-FILEEND				  Near	 DGROUP:02A0
-HANDLER				  Near	 DGROUP:0138
-LOOP2				  Near	 DGROUP:0235
-LOOP_REG			  Near	 DGROUP:0170
-NUMBERS				  Near	 DGROUP:0290
+DRAWLINE			  Near	 DGROUP:02CA
+DRAWTABLE			  Near	 DGROUP:0287
+ENDPRVALUECS			  Near	 DGROUP:020A
+ENDPRVALUEIP			  Near	 DGROUP:0212
+ENDPRVALUESP			  Near	 DGROUP:021F
+FILEEND				  Near	 DGROUP:0316
+HANDLEREND			  Near	 DGROUP:01D0
+KEYBOARDHANDLER			  Near	 DGROUP:0153
+LOOP2				  Near	 DGROUP:02AA
+LOOP_REG			  Near	 DGROUP:01E5
+NUMBERS				  Near	 DGROUP:0305
 NUM_REGS			  Number 000D
-OLDHDLRADDR			  Word	 DGROUP:016B
-OLDHDLRSEG			  Word	 DGROUP:016D
-PRINTREG			  Near	 DGROUP:020B
-PRINTREGS			  Near	 DGROUP:0170
-PRINTVALUE			  Near	 DGROUP:017F
-REGISTERS			  Near	 DGROUP:0269
+OLD08HDLRADDR			  Word	 DGROUP:01E0
+OLD08HDLRSEG			  Word	 DGROUP:01E2
+OLD09HDLRADDR			  Word	 DGROUP:019C
+OLD09HDLRSEG			  Word	 DGROUP:019E
+PRINTREG			  Near	 DGROUP:0280
+PRINTREGS			  Near	 DGROUP:01E5
+PRINTVALUE			  Near	 DGROUP:01F4
+REGISTERS			  Near	 DGROUP:02DE
 START				  Near	 DGROUP:0100
-STYLE				  Near	 DGROUP:0260
+STYLE				  Near	 DGROUP:02D5
 TBL_HGHT			  Number 000D
 TBL_WDTH			  Number 0007
+TIMERHANDLER			  Near	 DGROUP:01A1
 TTL_REGS			  Number 000D
 VIDEOSEG			  Number B800
 X_POS				  Number 0048
 Y_POS				  Number 0001
+Turbo Assembler	 Version 4.1	    02/27/25 23:09:17	    Page 11
+Symbol Table
+
+
+
 
 Groups & Segments		  Bit Size Align  Combine Class
 
 DGROUP				  Group
   _DATA				  16  0000 Word	  Public  DATA
-  _TEXT				  16  02A0 Word	  Public  CODE
+  _TEXT				  16  0316 Word	  Public  CODE
 
